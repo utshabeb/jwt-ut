@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Pencil, Save, X, PlusCircle, Settings2, ShieldQuestion } from "lucide-react";
 import type { TokenConfig, ClaimRule } from "@/lib/token-config/types";
-import { CONFIG_COLORS } from "@/lib/token-config/types";
+import { CONFIG_COLORS, RULE_OPERATORS } from "@/lib/token-config/types";
 import { loadConfigs, saveConfigs } from "@/lib/token-config/storage";
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-const EMPTY_RULE: ClaimRule = { key: "", value: "" };
+const EMPTY_RULE: ClaimRule = { key: "", operator: "exists", value: "" };
 
 function RuleRow({
   rule,
@@ -25,35 +25,68 @@ function RuleRow({
   onRemove: (i: number) => void;
   canRemove: boolean;
 }) {
+  const opMeta = RULE_OPERATORS.find((o) => o.value === rule.operator) ?? RULE_OPERATORS[0];
+
+  const inputStyle = {
+    backgroundColor: "var(--jwt-input-bg)",
+    border: "1px solid var(--jwt-border)",
+    color: "var(--jwt-text)",
+  };
+
   return (
     <div className="flex items-center gap-2">
+      {/* Claim key */}
       <input
         type="text"
         value={rule.key}
         onChange={(e) => onChange(index, { ...rule, key: e.target.value })}
         placeholder="claim key (e.g. iss)"
-        className="flex-1 rounded px-3 py-1.5 text-xs font-mono outline-none"
-        style={{
-          backgroundColor: "var(--jwt-input-bg)",
-          border: "1px solid var(--jwt-border)",
-          color: "var(--jwt-text)",
-        }}
+        className="flex-1 rounded px-3 py-1.5 text-xs font-mono outline-none min-w-0"
+        style={inputStyle}
         spellCheck={false}
       />
-      <span className="text-xs shrink-0" style={{ color: "var(--jwt-text-muted)" }}>=</span>
-      <input
-        type="text"
-        value={rule.value}
-        onChange={(e) => onChange(index, { ...rule, value: e.target.value })}
-        placeholder="any value"
-        className="flex-1 rounded px-3 py-1.5 text-xs font-mono outline-none"
-        style={{
-          backgroundColor: "var(--jwt-input-bg)",
-          border: "1px solid var(--jwt-border)",
-          color: "var(--jwt-text)",
-        }}
-        spellCheck={false}
-      />
+
+      {/* Operator dropdown */}
+      <select
+        value={rule.operator}
+        onChange={(e) =>
+          onChange(index, {
+            ...rule,
+            operator: e.target.value as ClaimRule["operator"],
+            value: "",
+          })
+        }
+        className="rounded px-2 py-1.5 text-xs outline-none shrink-0"
+        style={{ ...inputStyle, minWidth: 96 }}
+      >
+        {RULE_OPERATORS.map((op) => (
+          <option key={op.value} value={op.value}>
+            {op.label}
+          </option>
+        ))}
+      </select>
+
+      {/* Value — hidden for exists / not_exists */}
+      {opMeta.needsValue ? (
+        <input
+          type="text"
+          value={rule.value}
+          onChange={(e) => onChange(index, { ...rule, value: e.target.value })}
+          placeholder={
+            rule.operator === "gt" || rule.operator === "lt"
+              ? "number"
+              : "value"
+          }
+          className="flex-1 rounded px-3 py-1.5 text-xs font-mono outline-none min-w-0"
+          style={inputStyle}
+          spellCheck={false}
+        />
+      ) : (
+        <span className="flex-1 text-xs italic min-w-0" style={{ color: "var(--jwt-text-muted)" }}>
+          (no value needed)
+        </span>
+      )}
+
       {canRemove && (
         <button
           onClick={() => onRemove(index)}
@@ -301,9 +334,9 @@ export default function ConfigTab() {
           }}
         >
           <p className="font-semibold uppercase tracking-wide" style={{ color: "var(--jwt-text-muted)" }}>How it works</p>
-          <p>Paste a JWT in the <strong style={{ color: "var(--jwt-text)" }}>Decoder</strong> tab. The app checks all rules in each config against the decoded payload.</p>
+          <p>Paste a JWT in the <strong style={{ color: "var(--jwt-text)" }}>Decoder</strong> tab. The app checks all rules against the decoded payload.</p>
           <p>A config <strong style={{ color: "var(--jwt-text)" }}>matches</strong> when <em>all</em> its rules pass. The first matching config is shown as a badge.</p>
-          <p><strong style={{ color: "var(--jwt-text)" }}>Key only</strong> (empty value) → claim must exist. <strong style={{ color: "var(--jwt-text)" }}>Key + value</strong> → exact match.</p>
+          <p>Operators: <strong style={{ color: "var(--jwt-text)" }}>exists / not exists</strong> check presence. <strong style={{ color: "var(--jwt-text)" }}>= ≠ contains starts/ends with</strong> compare strings. <strong style={{ color: "var(--jwt-text)" }}>&gt; &lt;</strong> compare numbers.</p>
         </div>
       </div>
 
@@ -431,8 +464,8 @@ export default function ConfigTab() {
               {/* Column headers */}
               <div className="flex gap-2 text-xs px-0.5" style={{ color: "var(--jwt-text-muted)" }}>
                 <span className="flex-1">Claim Key</span>
-                <span className="text-xs w-3" />
-                <span className="flex-1">Value <span style={{ opacity: 0.6 }}>(empty = key exists)</span></span>
+                <span style={{ minWidth: 96 }}>Operator</span>
+                <span className="flex-1">Value</span>
                 <span className="w-6" />
               </div>
 

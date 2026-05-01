@@ -1,11 +1,58 @@
-import type { TokenConfig } from "./types";
+import type { TokenConfig, ClaimRule } from "./types";
 import type { JWTPayload } from "@/lib/jwt/types";
 
+function evalRule(rule: ClaimRule, payload: JWTPayload): boolean {
+  const raw = payload[rule.key];
+  const exists = raw !== undefined && raw !== null;
+
+  switch (rule.operator) {
+    case "exists":
+      return exists;
+
+    case "not_exists":
+      return !exists;
+
+    case "eq":
+      if (!exists) return false;
+      return String(raw) === rule.value.trim();
+
+    case "not_eq":
+      if (!exists) return false;
+      return String(raw) !== rule.value.trim();
+
+    case "contains":
+      if (!exists) return false;
+      return String(raw).toLowerCase().includes(rule.value.trim().toLowerCase());
+
+    case "starts_with":
+      if (!exists) return false;
+      return String(raw).toLowerCase().startsWith(rule.value.trim().toLowerCase());
+
+    case "ends_with":
+      if (!exists) return false;
+      return String(raw).toLowerCase().endsWith(rule.value.trim().toLowerCase());
+
+    case "gt": {
+      if (!exists) return false;
+      const n = Number(raw);
+      const v = Number(rule.value.trim());
+      return !isNaN(n) && !isNaN(v) && n > v;
+    }
+
+    case "lt": {
+      if (!exists) return false;
+      const n = Number(raw);
+      const v = Number(rule.value.trim());
+      return !isNaN(n) && !isNaN(v) && n < v;
+    }
+
+    default:
+      return false;
+  }
+}
+
 /**
- * Returns the first config whose rules ALL match the given payload.
- * Rule logic:
- *   - rule.value is empty  → claim key must exist in payload
- *   - rule.value non-empty → claim key must exist AND equal rule.value (string comparison)
+ * Returns the first config whose ALL rules match the given payload.
  */
 export function matchToken(
   payload: JWTPayload | null,
@@ -15,16 +62,9 @@ export function matchToken(
 
   for (const config of configs) {
     if (config.rules.length === 0) continue;
-
-    const allMatch = config.rules.every((rule) => {
-      if (!rule.key.trim()) return false;
-      const claimValue = payload[rule.key];
-      const exists = claimValue !== undefined && claimValue !== null;
-      if (!exists) return false;
-      if (rule.value.trim() === "") return true; // key-only check
-      return String(claimValue) === rule.value.trim();
-    });
-
+    const allMatch = config.rules.every(
+      (rule) => rule.key.trim() !== "" && evalRule(rule, payload)
+    );
     if (allMatch) return config;
   }
 
