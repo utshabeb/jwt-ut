@@ -80,7 +80,7 @@ interface JsonViewProps {
   value: string;
   onChange?: (v: string) => void;
   editable?: boolean;
-  rows?: number;
+  minRows?: number;
   hasError?: boolean;
   errorMessage?: string;
   accentColor?: string;
@@ -90,7 +90,7 @@ export default function JsonView({
   value,
   onChange,
   editable = false,
-  rows = 7,
+  minRows = 3,
   hasError = false,
   errorMessage,
   accentColor,
@@ -99,7 +99,6 @@ export default function JsonView({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLPreElement>(null);
 
-  // Pretty-print for read-only; use raw value for editable so cursor stays correct
   let display = value;
   try { display = JSON.stringify(JSON.parse(value), null, 2); } catch { /* keep raw */ }
 
@@ -111,7 +110,7 @@ export default function JsonView({
     ? (accentColor ?? "var(--jwt-cyan)")
     : "var(--jwt-border)";
 
-  const minH = `${rows * 1.75}rem`;
+  const minH = `${minRows * 1.75}rem`;
 
   // Sync scroll between textarea and highlight layer
   const syncScroll = () => {
@@ -128,7 +127,6 @@ export default function JsonView({
     ta.style.height = "auto";
     ta.style.height = `${ta.scrollHeight}px`;
   }, [value]);
-
   const sharedStyle: React.CSSProperties = {
     fontFamily: '"JetBrains Mono","Fira Code","Cascadia Code",Consolas,monospace',
     fontSize: "0.875rem",
@@ -140,6 +138,7 @@ export default function JsonView({
     minHeight: minH,
     width: "100%",
     boxSizing: "border-box",
+    height: "auto",
   };
 
   return (
@@ -153,7 +152,7 @@ export default function JsonView({
     >
       {/* Read-only: just the highlighted pre */}
       {!editable && (
-        <pre style={{ ...sharedStyle, background: "transparent", color: "var(--jwt-text)", overflow: "auto" }}>
+        <pre style={{ ...sharedStyle, background: "transparent", color: "var(--jwt-text)", overflow: "visible", height: "auto" }}>
           {tokens.map((tok, i) => (
             <span key={i} style={{ color: COLOR[tok.type] }}>{tok.value}</span>
           ))}
@@ -171,8 +170,9 @@ export default function JsonView({
               ...sharedStyle,
               position: "absolute",
               inset: 0,
+              height: "100%",
               background: "transparent",
-              color: "transparent", // text hidden — only spans show
+              color: "transparent",
               pointerEvents: "none",
               overflow: "hidden",
               zIndex: 0,

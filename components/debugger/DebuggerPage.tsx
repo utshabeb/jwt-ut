@@ -22,6 +22,36 @@ import {
 } from "@/lib/jwt/constants";
 import { isPublicToken } from "@/lib/jwt/jwks";
 
+// ---- Auto-resizing textarea ----
+function AutoTextarea({
+  value,
+  onChange,
+  placeholder,
+  className,
+  style,
+  spellCheck,
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const ta = ref.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = `${ta.scrollHeight}px`;
+  }, [value]);
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={className}
+      style={{ ...style, resize: "none", overflow: "hidden" }}
+      spellCheck={spellCheck}
+      rows={1}
+    />
+  );
+}
+
 // ---- Default example token (pre-signed HS256) ----
 const EXAMPLE_TOKEN =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" +
@@ -547,9 +577,9 @@ export default function DebuggerPage() {
                   Secret
                 </label>
                 <div className="relative">
-                  <textarea
+                 <AutoTextarea
                     value={secret}
-                    onChange={(e) => setSecret(e.target.value)}
+                    onChange={(e) => setSecret((e.target as HTMLTextAreaElement).value)}
                     rows={2}
                     placeholder="Enter HMAC secret..."
                     className="w-full rounded p-3 font-mono text-sm"
@@ -591,9 +621,9 @@ export default function DebuggerPage() {
                   >
                     Public Key (verify)
                   </label>
-                  <textarea
+                  <AutoTextarea
                     value={publicKey}
-                    onChange={(e) => setPublicKey(e.target.value)}
+                    onChange={(e) => setPublicKey((e.target as HTMLTextAreaElement).value)}
                     rows={4}
                     placeholder="-----BEGIN PUBLIC KEY-----&#10;..."
                     className="w-full rounded p-3 font-mono text-xs"
@@ -613,9 +643,9 @@ export default function DebuggerPage() {
                     >
                       Private Key (sign)
                     </label>
-                    <textarea
+                    <AutoTextarea
                       value={privateKey}
-                      onChange={(e) => setPrivateKey(e.target.value)}
+                      onChange={(e) => setPrivateKey((e.target as HTMLTextAreaElement).value)}
                       rows={4}
                       placeholder="-----BEGIN PRIVATE KEY-----&#10;..."
                       className="w-full rounded p-3 font-mono text-xs"
@@ -732,7 +762,7 @@ function Panel({
           value={jsonValue}
           onChange={handleJsonChange}
           editable={editable}
-          rows={title.includes("Header") ? 5 : 14}
+          minRows={title.includes("Header") ? 3 : 5}
           hasError={!!jsonError}
           errorMessage={jsonError}
           accentColor={color}
@@ -823,7 +853,7 @@ function ColoredTokenInput({
       onCompositionEnd={() => { isComposing.current = false; handleInput(); }}
       data-placeholder="Paste a JWT here…"
       spellCheck={false}
-      className="w-full rounded p-3 font-mono text-sm leading-relaxed break-all min-h-[120px] outline-none"
+      className="w-full rounded p-3 font-mono text-sm leading-relaxed break-all outline-none"
       style={{
         backgroundColor: "var(--jwt-input-bg)",
         border: hasError ? "1px solid var(--jwt-red)" : "1px solid var(--jwt-border)",
