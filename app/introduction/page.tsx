@@ -31,17 +31,17 @@ export default function IntroductionPage() {
           Introduction to JSON Web Tokens
         </h1>
         <p className="mb-8" style={{ color: "var(--jwt-text-muted)" }}>
-          Level up! Get the{" "}
+          Built by{" "}
           <a
-            href="https://auth0.com/resources/ebooks/jwt-handbook"
+            href="https://github.com/utdevnp"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: "var(--jwt-cyan)" }}
             className="hover:underline"
           >
-            JWT Handbook for free
+            Utshab Luitel
           </a>{" "}
-          and learn JWTs in depth!
+          — Web Developer at Ebpearls Multipurpose Pvt Ltd, Kathmandu Nepal.
         </p>
 
         <Section id="what-is-jwt" title="What is JSON Web Token?">
@@ -307,11 +307,11 @@ export default function IntroductionPage() {
             Get Started with JSON Web Tokens
           </h3>
           <p className="mb-4" style={{ color: "var(--jwt-text-muted)" }}>
-            Securely implement authentication with JWTs using Auth0 on any
-            stack and any device in less than 10 minutes.
+            Explore more open source projects by Utshab Luitel — web developer at
+            Ebpearls Multipurpose Pvt Ltd, Kathmandu Nepal.
           </p>
           <a
-            href="https://auth0.com/signup"
+            href="https://github.com/utdevnp"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-6 py-2 rounded font-semibold text-sm transition-opacity hover:opacity-90"
@@ -320,7 +320,7 @@ export default function IntroductionPage() {
               color: "#0f3460",
             }}
           >
-            Create a free account
+            View GitHub Profile
           </a>
         </div>
       </article>

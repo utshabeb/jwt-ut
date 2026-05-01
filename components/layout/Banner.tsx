@@ -15,15 +15,15 @@ export default function Banner() {
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--jwt-text-muted)" }}>
           <BookOpen size={14} style={{ color: "var(--jwt-cyan)" }} />
           <span>
-            Get up-to-speed with JSON Web Tokens.{" "}
+            A JWT debugger built by Utshab Luitel.{" "}
             <a
-              href="https://auth0.com/resources/ebooks/jwt-handbook"
+              href="https://github.com/utdevnp"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: "var(--jwt-cyan)" }}
               className="hover:underline font-medium"
             >
-              Get the JWT Handbook for free →
+              View more projects on GitHub →
             </a>
           </span>
         </div>

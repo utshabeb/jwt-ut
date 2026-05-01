@@ -1,4 +1,4 @@
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, MapPin, Building2 } from "lucide-react";
 
 const toolLinks = [
   { label: "Passkeys Playground", href: "https://learnpasskeys.io/" },
@@ -8,8 +8,8 @@ const toolLinks = [
 ];
 
 const legalLinks = [
-  { label: "Privacy Policy", href: "https://www.okta.com/privacy-policy/" },
-  { label: "Security", href: "https://trust.okta.com/" },
+  { label: "MIT License", href: "https://github.com/utdevnp/jwt-ut/blob/main/LICENSE" },
+  { label: "Source Code", href: "https://github.com/utshabeb/jwt-ut" },
 ];
 
 export default function Footer() {
@@ -23,16 +23,26 @@ export default function Footer() {
           {/* Branding */}
           <div>
             <p
-              className="text-xs font-semibold tracking-widest uppercase mb-3"
+              className="text-xs font-semibold tracking-widest uppercase mb-1"
               style={{ color: "var(--jwt-text-muted)" }}
             >
-              Presented by Auth0
+              Built by
             </p>
-            <div className="flex gap-3 mt-4">
+            <p className="text-base font-bold mb-1" style={{ color: "var(--jwt-text)" }}>
+              Utshab Luitel
+            </p>
+            <div className="flex items-center gap-1.5 text-xs mb-1" style={{ color: "var(--jwt-text-muted)" }}>
+              <Building2 size={12} />
+              <span>Ebpearls Multipurpose Pvt Ltd</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs mb-4" style={{ color: "var(--jwt-text-muted)" }}>
+              <MapPin size={12} />
+              <span>Kathmandu, Nepal</span>
+            </div>
+            <div className="flex gap-3">
               {[
-                { href: "https://www.youtube.com/oktadev", label: "YouTube" },
-                { href: "https://x.com/auth0", label: "X / Twitter" },
-                { href: "https://www.linkedin.com/company/oktadev/", label: "LinkedIn" },
+                { href: "https://github.com/utdevnp", label: "GitHub" },
+                { href: "https://www.linkedin.com/in/utsabluitel", label: "LinkedIn" },
               ].map((s) => (
                 <a
                   key={s.href}
@@ -75,13 +85,13 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Links */}
           <div>
             <p
               className="text-xs font-semibold tracking-widest uppercase mb-3"
               style={{ color: "var(--jwt-text-muted)" }}
             >
-              Legal
+              Project
             </p>
             <ul className="space-y-2">
               {legalLinks.map((l) => (
@@ -90,9 +100,10 @@ export default function Footer() {
                     href={l.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm hover-text transition-colors"
+                    className="text-sm hover-text transition-colors flex items-center gap-1"
                     style={{ color: "var(--jwt-text-muted)" }}
                   >
+                    <ExternalLink size={12} />
                     {l.label}
                   </a>
                 </li>
@@ -105,7 +116,7 @@ export default function Footer() {
           className="pt-6 text-xs"
           style={{ borderTop: "1px solid var(--jwt-border)", color: "var(--jwt-text-muted)" }}
         >
-          Copyright © {new Date().getFullYear()} Okta. All rights reserved.
+          Copyright © {new Date().getFullYear()} Utshab Luitel · Ebpearls Multipurpose Pvt Ltd · Kathmandu, Nepal
         </div>
       </div>
     </footer>

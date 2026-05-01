@@ -9,7 +9,7 @@ const navLinks = [
   { href: "/", label: "Debugger" },
   { href: "/introduction", label: "Introduction" },
   { href: "/libraries", label: "Libraries" },
-  { href: "https://community.auth0.com/c/jwt/8", label: "Ask", external: true },
+  { href: "https://github.com/utdevnp", label: "GitHub", external: true },
 ];
 
 const themeOptions: { value: Theme; icon: React.ReactNode; label: string }[] = [
