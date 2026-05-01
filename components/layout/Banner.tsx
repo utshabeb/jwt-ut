@@ -15,7 +15,7 @@ export default function Banner() {
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--jwt-text-muted)" }}>
           <BookOpen size={14} style={{ color: "var(--jwt-cyan)" }} />
           <span>
-            A JWT debugger built by Utshab Luitel.{" "}
+            A JWT debugger built by{" "}
             <a
               href="https://github.com/utdevnp"
               target="_blank"
@@ -23,7 +23,7 @@ export default function Banner() {
               style={{ color: "var(--jwt-cyan)" }}
               className="hover:underline font-medium"
             >
-              View more projects on GitHub →
+              @utdevnp →
             </a>
           </span>
         </div>

@@ -1,4 +1,4 @@
-import { ExternalLink, MapPin, Building2 } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 const toolLinks = [
   { label: "Passkeys Playground", href: "https://learnpasskeys.io/" },
@@ -7,9 +7,9 @@ const toolLinks = [
   { label: "SAML Tool", href: "https://samltool.io/" },
 ];
 
-const legalLinks = [
-  { label: "MIT License", href: "https://github.com/utdevnp/jwt-ut/blob/main/LICENSE" },
+const projectLinks = [
   { label: "Source Code", href: "https://github.com/utshabeb/jwt-ut" },
+  { label: "GitHub Profile", href: "https://github.com/utdevnp" },
 ];
 
 export default function Footer() {
@@ -23,41 +23,20 @@ export default function Footer() {
           {/* Branding */}
           <div>
             <p
-              className="text-xs font-semibold tracking-widest uppercase mb-1"
+              className="text-xs font-semibold tracking-widest uppercase mb-2"
               style={{ color: "var(--jwt-text-muted)" }}
             >
               Built by
             </p>
-            <p className="text-base font-bold mb-1" style={{ color: "var(--jwt-text)" }}>
-              Utshab Luitel
-            </p>
-            <div className="flex items-center gap-1.5 text-xs mb-1" style={{ color: "var(--jwt-text-muted)" }}>
-              <Building2 size={12} />
-              <span>Ebpearls Multipurpose Pvt Ltd</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs mb-4" style={{ color: "var(--jwt-text-muted)" }}>
-              <MapPin size={12} />
-              <span>Kathmandu, Nepal</span>
-            </div>
-            <div className="flex gap-3">
-              {[
-                { href: "https://github.com/utdevnp", label: "GitHub" },
-                { href: "https://www.linkedin.com/in/utsabluitel", label: "LinkedIn" },
-              ].map((s) => (
-                <a
-                  key={s.href}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "var(--jwt-text-muted)" }}
-                  className="hover-text transition-colors flex items-center gap-1 text-xs"
-                  aria-label={s.label}
-                >
-                  <ExternalLink size={14} />
-                  <span>{s.label}</span>
-                </a>
-              ))}
-            </div>
+            <a
+              href="https://github.com/utdevnp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-base font-bold hover-text transition-colors"
+              style={{ color: "var(--jwt-cyan)" }}
+            >
+              @utdevnp
+            </a>
           </div>
 
           {/* Tools */}
@@ -85,7 +64,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Links */}
+          {/* Project */}
           <div>
             <p
               className="text-xs font-semibold tracking-widest uppercase mb-3"
@@ -94,7 +73,7 @@ export default function Footer() {
               Project
             </p>
             <ul className="space-y-2">
-              {legalLinks.map((l) => (
+              {projectLinks.map((l) => (
                 <li key={l.href}>
                   <a
                     href={l.href}
@@ -116,7 +95,7 @@ export default function Footer() {
           className="pt-6 text-xs"
           style={{ borderTop: "1px solid var(--jwt-border)", color: "var(--jwt-text-muted)" }}
         >
-          Copyright © {new Date().getFullYear()} Utshab Luitel · Ebpearls Multipurpose Pvt Ltd · Kathmandu, Nepal
+          Copyright © {new Date().getFullYear()} <a href="https://github.com/utdevnp" target="_blank" rel="noopener noreferrer" className="hover-text transition-colors" style={{ color: "var(--jwt-cyan)" }}>@utdevnp</a>. All rights reserved.
         </div>
       </div>
     </footer>

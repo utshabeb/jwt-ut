@@ -39,9 +39,8 @@ export default function IntroductionPage() {
             style={{ color: "var(--jwt-cyan)" }}
             className="hover:underline"
           >
-            Utshab Luitel
-          </a>{" "}
-          — Web Developer at Ebpearls Multipurpose Pvt Ltd, Kathmandu Nepal.
+            @utdevnp
+          </a>.
         </p>
 
         <Section id="what-is-jwt" title="What is JSON Web Token?">
@@ -307,8 +306,8 @@ export default function IntroductionPage() {
             Get Started with JSON Web Tokens
           </h3>
           <p className="mb-4" style={{ color: "var(--jwt-text-muted)" }}>
-            Explore more open source projects by Utshab Luitel — web developer at
-            Ebpearls Multipurpose Pvt Ltd, Kathmandu Nepal.
+            Explore more open source projects by{" "}
+            <a href="https://github.com/utdevnp" target="_blank" rel="noopener noreferrer" style={{ color: "var(--jwt-cyan)" }} className="hover:underline">@utdevnp</a>.
           </p>
           <a
             href="https://github.com/utdevnp"
