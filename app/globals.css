@@ -103,6 +103,11 @@ button, input, select, textarea {
   transition: border-color 0.15s, background-color 0.15s, color 0.15s;
 }
 
+/* All buttons are clickable */
+button, [role="button"], label[for], summary {
+  cursor: pointer;
+}
+
 /* Theme-aware hover: muted → primary text */
 .hover-text:hover {
   color: var(--jwt-text) !important;
