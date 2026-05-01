@@ -41,12 +41,14 @@ export interface TokenConfig {
 }
 
 export const CONFIG_COLORS = [
-  "#00b9f1", // cyan
-  "#d63aff", // purple
-  "#00c896", // green
-  "#f0c040", // yellow
-  "#fb015b", // red
-  "#f97316", // orange
-  "#818cf8", // indigo
-  "#34d399", // emerald
+  "#5b9fb5", // muted cyan
+  "#9b6bb5", // muted purple
+  "#3a9e7e", // muted green
+  "#b5923a", // muted yellow/amber
+  "#b54a6a", // muted red
+  "#b56b3a", // muted orange
+  "#6b6fb5", // muted indigo
+  "#3a9e7e", // muted emerald — replaced with teal
+  "#7a8fa6", // slate blue
+  "#8a7a6a", // warm brown
 ];
