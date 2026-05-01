@@ -16,15 +16,15 @@ export interface RuleOperatorMeta {
 }
 
 export const RULE_OPERATORS: RuleOperatorMeta[] = [
-  { value: "exists",      label: "exists",      needsValue: false },
-  { value: "not_exists",  label: "not exists",  needsValue: false },
-  { value: "eq",          label: "=",           needsValue: true  },
-  { value: "not_eq",      label: "≠",           needsValue: true  },
-  { value: "contains",    label: "contains",    needsValue: true  },
-  { value: "starts_with", label: "starts with", needsValue: true  },
-  { value: "ends_with",   label: "ends with",   needsValue: true  },
-  { value: "gt",          label: ">",           needsValue: true  },
-  { value: "lt",          label: "<",           needsValue: true  },
+  { value: "exists",      label: "exists",           needsValue: false },
+  { value: "not_exists",  label: "does not exist",   needsValue: false },
+  { value: "eq",          label: "equals",           needsValue: true  },
+  { value: "not_eq",      label: "not equals",       needsValue: true  },
+  { value: "contains",    label: "contains",         needsValue: true  },
+  { value: "starts_with", label: "starts with",      needsValue: true  },
+  { value: "ends_with",   label: "ends with",        needsValue: true  },
+  { value: "gt",          label: "greater than",     needsValue: true  },
+  { value: "lt",          label: "less than",        needsValue: true  },
 ];
 
 export interface ClaimRule {
