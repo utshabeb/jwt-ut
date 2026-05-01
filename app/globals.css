@@ -119,3 +119,10 @@ button, [role="button"], label[for], summary {
   color: var(--jwt-text-muted);
   pointer-events: none;
 }
+
+/* Reset browser default mark styles */
+mark {
+  background-color: #f59e0b;
+  color: #000000;
+  -webkit-text-fill-color: #000000;
+}

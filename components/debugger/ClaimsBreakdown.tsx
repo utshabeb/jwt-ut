@@ -84,10 +84,13 @@ export default function ClaimsBreakdown({ payload, searchable = false }: ClaimsB
                   {text.slice(0, idx)}
                   <mark
                     style={{
-                      backgroundColor: "var(--jwt-yellow)",
-                      color: "#1a1a2e",
-                      borderRadius: "2px",
-                      padding: "0 1px",
+                      backgroundColor: "#f59e0b",
+                      color: "#000000",
+                      borderRadius: "3px",
+                      padding: "1px 3px",
+                      fontWeight: 700,
+                      boxShadow: "0 0 0 1px #f59e0b",
+                      WebkitTextFillColor: "#000000",
                     }}
                   >
                     {text.slice(idx, idx + q.length)}
