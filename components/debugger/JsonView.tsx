@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
 interface Token {
   type: "brace" | "bracket" | "key" | "string" | "number" | "boolean" | "null" | "colon" | "comma" | "whitespace";
@@ -112,21 +112,6 @@ export default function JsonView({
 
   const minH = `${minRows * 1.75}rem`;
 
-  // Sync scroll between textarea and highlight layer
-  const syncScroll = () => {
-    if (textareaRef.current && highlightRef.current) {
-      highlightRef.current.scrollTop  = textareaRef.current.scrollTop;
-      highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
-    }
-  };
-
-  // Auto-resize textarea height to content
-  useEffect(() => {
-    const ta = textareaRef.current;
-    if (!ta) return;
-    ta.style.height = "auto";
-    ta.style.height = `${ta.scrollHeight}px`;
-  }, [value]);
   const sharedStyle: React.CSSProperties = {
     fontFamily: '"JetBrains Mono","Fira Code","Cascadia Code",Consolas,monospace',
     fontSize: "0.875rem",
@@ -159,43 +144,41 @@ export default function JsonView({
         </pre>
       )}
 
-      {/* Editable: highlighted pre + transparent textarea stacked */}
+      {/* Editable: CSS-grid stack so both layers size together */}
       {editable && (
-        <div className="relative">
-          {/* Highlight layer — behind textarea */}
+        <div style={{ display: "grid" }}>
+          {/* Highlight layer — sits in grid cell, drives height via content */}
           <pre
             ref={highlightRef}
             aria-hidden
             style={{
               ...sharedStyle,
-              position: "absolute",
-              inset: 0,
-              height: "100%",
+              gridArea: "1 / 1",
               background: "transparent",
-              color: "transparent",
               pointerEvents: "none",
+              userSelect: "none",
+              visibility: "visible",
               overflow: "hidden",
-              zIndex: 0,
             }}
           >
             {tokens.map((tok, i) => (
               <span key={i} style={{ color: COLOR[tok.type] }}>{tok.value}</span>
             ))}
+            {/* trailing space so empty textarea matches pre height */}
+            {" "}
           </pre>
 
-          {/* Textarea — transparent text, caret visible */}
+          {/* Textarea — overlays same grid cell, transparent text, caret visible */}
           <textarea
             ref={textareaRef}
             value={value}
             onChange={(e) => onChange?.(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            onScroll={syncScroll}
             spellCheck={false}
             style={{
               ...sharedStyle,
-              position: "relative",
-              zIndex: 1,
+              gridArea: "1 / 1",
               background: "transparent",
               color: "transparent",
               caretColor: "var(--jwt-text)",
