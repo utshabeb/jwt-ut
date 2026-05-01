@@ -455,14 +455,6 @@ export default function DebuggerPage() {
             </p>
           )}
 
-          {/* Token type badge — only in decoder */}
-          {activeTab === "decoder" && (
-            <TokenTypeBadge
-              match={tokenMatch}
-              onGoToConfig={() => setActiveTab("config")}
-            />
-          )}
-
           <div className="flex items-center justify-between">
             <CombinedStatus
               verifyStatus={verifyStatus}
@@ -515,6 +507,11 @@ export default function DebuggerPage() {
             onJsonChange={setPayloadJson}
             parsedValue={parsedPayload}
             editable={activeTab === "encoder"}
+            badge={
+              activeTab === "decoder"
+                ? <TokenTypeBadge match={tokenMatch} onGoToConfig={() => setActiveTab("config")} />
+                : undefined
+            }
           />
 
           {/* Signature Verification */}
@@ -733,6 +730,7 @@ interface PanelProps {
   onJsonChange: (v: string) => void;
   parsedValue: JOSEHeader | JWTPayload | null;
   editable: boolean;
+  badge?: React.ReactNode;
 }
 
 function Panel({
@@ -744,6 +742,7 @@ function Panel({
   onJsonChange,
   parsedValue,
   editable,
+  badge,
 }: PanelProps) {
   const [jsonError, setJsonError] = useState("");
 
@@ -819,6 +818,9 @@ function Panel({
           </p>
         )
       )}
+
+      {/* Badge slot — e.g. token type match */}
+      {badge && <div className="mt-3">{badge}</div>}
     </div>
   );
 }
