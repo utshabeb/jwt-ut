@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Trash2, RefreshCw } from "lucide-react";
+import { Trash2, RefreshCw, ScanSearch, PenLine, Braces, List } from "lucide-react";
 import CopyButton from "./CopyButton";
 import ClaimsBreakdown from "./ClaimsBreakdown";
 import CombinedStatus from "./CombinedStatus";
 import AlgorithmSelector from "./AlgorithmSelector";
+import JsonView from "./JsonView";
 import {
   decodeJWT,
   signJWT,
@@ -328,7 +329,7 @@ export default function DebuggerPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className="px-5 py-2 text-sm font-medium rounded-t capitalize"
+            className="flex items-center gap-2 px-5 py-2.5 text-base font-semibold rounded-t"
             style={{
               backgroundColor:
                 activeTab === tab ? "var(--jwt-surface)" : "transparent",
@@ -340,7 +341,9 @@ export default function DebuggerPage() {
                   : "2px solid transparent",
             }}
           >
-            {tab === "decoder" ? "🔍 Decoder" : "✏️ Encoder"}
+            {tab === "decoder"
+              ? <><ScanSearch size={16} /> Decoder</>
+              : <><PenLine size={16} /> Encoder</>}
           </button>
         ))}
       </div>
@@ -356,7 +359,7 @@ export default function DebuggerPage() {
           }}
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--jwt-text-muted)" }}>
+            <h2 className="text-sm font-bold uppercase tracking-widest" style={{ color: "var(--jwt-text-muted)" }}>
               {activeTab === "decoder" ? "Encoded Token — paste below" : "Encoded Token"}
             </h2>
             <div className="flex items-center gap-2">
@@ -452,10 +455,10 @@ export default function DebuggerPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3
-                className="text-xs font-semibold uppercase tracking-widest"
-                style={{ color: "var(--jwt-text-muted)" }}
-              >
-                Signature Verification
+              className="text-sm font-bold uppercase tracking-widest"
+              style={{ color: "var(--jwt-text-muted)" }}
+            >
+              Signature Verification
               </h3>
               <AlgorithmSelector
                 value={algorithm}
@@ -693,7 +696,7 @@ function Panel({
       {/* Header row */}
       <div className="flex items-center justify-between mb-3">
         <h3
-          className="text-xs font-semibold uppercase tracking-widest"
+          className="text-sm font-bold uppercase tracking-widest"
           style={{ color }}
         >
           {title}
@@ -708,14 +711,14 @@ function Panel({
               <button
                 key={v}
                 onClick={() => onViewChange(v)}
-                className="px-2 py-1 capitalize"
+                className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium"
                 style={{
                   backgroundColor:
                     view === v ? "var(--jwt-surface2)" : "transparent",
                   color: view === v ? color : "var(--jwt-text-muted)",
                 }}
               >
-                {v === "json" ? "JSON" : "Claims"}
+                {v === "json" ? <><Braces size={12} /> JSON</> : <><List size={12} /> Claims</>}
               </button>
             ))}
           </div>
@@ -725,29 +728,15 @@ function Panel({
 
       {/* Content */}
       {view === "json" ? (
-        <>
-          <textarea
-            value={jsonValue}
-            onChange={(e) => handleJsonChange(e.target.value)}
-            readOnly={!editable}
-            rows={title.includes("Header") ? 4 : 7}
-            className="w-full rounded p-3 font-mono text-xs leading-relaxed"
-            style={{
-              backgroundColor: "var(--jwt-input-bg)",
-              border: jsonError
-                ? "1px solid var(--jwt-red)"
-                : "1px solid var(--jwt-border)",
-              color: "var(--jwt-text)",
-              cursor: editable ? "text" : "default",
-            }}
-            spellCheck={false}
-          />
-          {jsonError && (
-            <p className="text-xs mt-1" style={{ color: "var(--jwt-red)" }}>
-              ⚠ {jsonError}
-            </p>
-          )}
-        </>
+        <JsonView
+          value={jsonValue}
+          onChange={handleJsonChange}
+          editable={editable}
+          rows={title.includes("Header") ? 5 : 14}
+          hasError={!!jsonError}
+          errorMessage={jsonError}
+          accentColor={color}
+        />
       ) : (
         parsedValue ? (
           <ClaimsBreakdown payload={parsedValue as JWTPayload} />

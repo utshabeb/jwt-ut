@@ -17,6 +17,14 @@
   --jwt-input-bg: rgba(0,0,0,0.2);
   --jwt-code-bg: rgba(0,0,0,0.3);
   --jwt-hover-bg: rgba(255,255,255,0.05);
+
+  /* JSON syntax colors — dark mode: muted, easy on eyes */
+  --json-key:     #7dd3fc;   /* sky-300 — soft blue */
+  --json-string:  #86efac;   /* green-300 — soft green */
+  --json-number:  #c4b5fd;   /* violet-300 — soft violet */
+  --json-boolean: #fde68a;   /* amber-200 — soft yellow */
+  --json-null:    #fca5a5;   /* red-300 — soft red */
+  --json-punct:   #4a5568;   /* gray-600 — very dim */
 }
 
 /* ── Light theme ───────────────────────────────────────── */
@@ -35,6 +43,14 @@
   --jwt-input-bg: rgba(0,0,0,0.03);
   --jwt-code-bg: rgba(0,0,0,0.04);
   --jwt-hover-bg: rgba(0,0,0,0.04);
+
+  /* JSON syntax colors — light mode: dark, readable on white */
+  --json-key:     #c2410c;   /* dark orange */
+  --json-string:  #15803d;   /* dark green */
+  --json-number:  #7e22ce;   /* dark violet */
+  --json-boolean: #a16207;   /* dark amber */
+  --json-null:    #b91c1c;   /* dark red */
+  --json-punct:   #64748b;   /* slate */
 }
 
 * {
