@@ -769,7 +769,7 @@ function Panel({
         />
       ) : (
         parsedValue ? (
-          <ClaimsBreakdown payload={parsedValue as JWTPayload} />
+          <ClaimsBreakdown payload={parsedValue as JWTPayload} searchable={title.includes("Payload")} />
         ) : (
           <p className="text-xs" style={{ color: "var(--jwt-text-muted)" }}>
             Invalid JSON — fix to see claims breakdown
