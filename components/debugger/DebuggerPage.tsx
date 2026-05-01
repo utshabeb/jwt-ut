@@ -798,6 +798,9 @@ function Panel({
         </div>
       </div>
 
+      {/* Badge slot — e.g. token type match */}
+      {badge && <div className="mb-3">{badge}</div>}
+
       {/* Content */}
       {view === "json" ? (
         <JsonView
@@ -818,9 +821,6 @@ function Panel({
           </p>
         )
       )}
-
-      {/* Badge slot — e.g. token type match */}
-      {badge && <div className="mt-3">{badge}</div>}
     </div>
   );
 }
