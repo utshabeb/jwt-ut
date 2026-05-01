@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Trash2, RefreshCw, ScanSearch, PenLine, Braces, List } from "lucide-react";
+import { Trash2, RefreshCw, ScanSearch, PenLine, Braces, List, Settings2 } from "lucide-react";
 import CopyButton from "./CopyButton";
 import ClaimsBreakdown from "./ClaimsBreakdown";
 import CombinedStatus from "./CombinedStatus";
 import AlgorithmSelector from "./AlgorithmSelector";
 import JsonView from "./JsonView";
+import ConfigTab from "./ConfigTab";
+import TokenTypeBadge from "./TokenTypeBadge";
 import {
   decodeJWT,
   signJWT,
@@ -21,6 +23,9 @@ import {
   isHmacAlg,
 } from "@/lib/jwt/constants";
 import { isPublicToken } from "@/lib/jwt/jwks";
+import { loadConfigs } from "@/lib/token-config/storage";
+import { matchToken } from "@/lib/token-config/matcher";
+import type { TokenConfig } from "@/lib/token-config/types";
 
 // ---- Auto-resizing textarea ----
 function AutoTextarea({
@@ -58,11 +63,15 @@ const EXAMPLE_TOKEN =
   ".eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0" +
   ".SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 
-type TabType = "decoder" | "encoder";
+type TabType = "decoder" | "encoder" | "config";
 type ViewType = "json" | "claims";
 
 export default function DebuggerPage() {
   const [activeTab, setActiveTab] = useState<TabType>("decoder");
+
+  // --- Token type detection ---
+  const [tokenConfigs, setTokenConfigs] = useState<TokenConfig[]>([]);
+  const [tokenMatch, setTokenMatch] = useState<TokenConfig | null>(null);
 
   // --- Encoded token ---
   const [encodedToken, setEncodedToken] = useState(EXAMPLE_TOKEN);
@@ -99,6 +108,21 @@ export default function DebuggerPage() {
   // Prevent loops between encoded <-> decoded edits
   const isUpdatingFromEncoded = useRef(false);
   const isUpdatingFromDecoded = useRef(false);
+
+  // ---- Load token configs from localStorage on mount ----
+  useEffect(() => {
+    setTokenConfigs(loadConfigs());
+  }, []);
+
+  // ---- Re-run match when payload or configs change ----
+  useEffect(() => {
+    try {
+      const payload = JSON.parse(payloadJson) as JWTPayload;
+      setTokenMatch(matchToken(payload, tokenConfigs));
+    } catch {
+      setTokenMatch(null);
+    }
+  }, [payloadJson, tokenConfigs]);
 
   // ---- Decode encoded token → update decoded panels ----
   const decodeToken = useCallback(
@@ -355,10 +379,14 @@ export default function DebuggerPage() {
 
       {/* Tab switcher */}
       <div className="flex gap-1 mb-6">
-        {(["decoder", "encoder"] as const).map((tab) => (
+        {(["decoder", "encoder", "config"] as const).map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => {
+              setActiveTab(tab);
+              // Reload configs when switching to config tab (or back)
+              if (tab !== "config") setTokenConfigs(loadConfigs());
+            }}
             className="flex items-center gap-2 px-5 py-2.5 text-base font-semibold rounded-t"
             style={{
               backgroundColor:
@@ -371,14 +399,20 @@ export default function DebuggerPage() {
                   : "2px solid transparent",
             }}
           >
-            {tab === "decoder"
-              ? <><ScanSearch size={16} /> Decoder</>
-              : <><PenLine size={16} /> Encoder</>}
+            {tab === "decoder" && <><ScanSearch size={16} /> Decoder</>}
+            {tab === "encoder" && <><PenLine size={16} /> Encoder</>}
+            {tab === "config"  && <><Settings2 size={16} /> Config</>}
           </button>
         ))}
       </div>
 
-      {/* Main two-column layout */}
+      {/* Config tab */}
+      {activeTab === "config" && (
+        <ConfigTab />
+      )}
+
+      {/* Main two-column layout (decoder + encoder) */}
+      {activeTab !== "config" && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ====== LEFT: Encoded Token ====== */}
         <div
@@ -419,6 +453,14 @@ export default function DebuggerPage() {
             <p className="text-xs" style={{ color: "var(--jwt-red)" }}>
               ⚠ {parseError}
             </p>
+          )}
+
+          {/* Token type badge — only in decoder */}
+          {activeTab === "decoder" && (
+            <TokenTypeBadge
+              match={tokenMatch}
+              onGoToConfig={() => setActiveTab("config")}
+            />
           )}
 
           <div className="flex items-center justify-between">
@@ -663,6 +705,7 @@ export default function DebuggerPage() {
           </div>
         </div>
       </div>
+      )} {/* end activeTab !== "config" */}
 
       {/* Legend */}
       <div className="flex items-center gap-6 mt-6 text-xs" style={{ color: "var(--jwt-text-muted)" }}>
