@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Trash2, RefreshCw } from "lucide-react";
 import CopyButton from "./CopyButton";
 import ClaimsBreakdown from "./ClaimsBreakdown";
-import TokenStatus from "./TokenStatus";
+import CombinedStatus from "./CombinedStatus";
 import AlgorithmSelector from "./AlgorithmSelector";
 import {
   decodeJWT,
@@ -300,9 +300,6 @@ export default function DebuggerPage() {
   try { parsedHeader = JSON.parse(headerJson); } catch { /* ignore */ }
   try { parsedPayload = JSON.parse(payloadJson); } catch { /* ignore */ }
 
-  // Color-coded token display
-  const tokenParts = encodedToken.split(".");
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       {/* Hero */}
@@ -378,35 +375,11 @@ export default function DebuggerPage() {
             </div>
           </div>
 
-          {/* Color-coded token preview */}
-          {encodedToken && !parseError && tokenParts.length === 3 && (
-            <div
-              className="rounded p-3 font-mono text-xs break-all leading-relaxed"
-              style={{ backgroundColor: "var(--jwt-code-bg)", border: "1px solid var(--jwt-border)" }}
-            >
-              <span style={{ color: "var(--jwt-red)" }}>{tokenParts[0]}</span>
-              <span style={{ color: "var(--jwt-text)" }}>.</span>
-              <span style={{ color: "var(--jwt-purple)" }}>{tokenParts[1]}</span>
-              <span style={{ color: "var(--jwt-text)" }}>.</span>
-              <span style={{ color: "var(--jwt-cyan)" }}>{tokenParts[2]}</span>
-            </div>
-          )}
-
-          {/* Textarea */}
-          <textarea
+          {/* Single color-coded editable input */}
+          <ColoredTokenInput
             value={encodedToken}
-            onChange={(e) => setEncodedToken(e.target.value)}
-            rows={8}
-            placeholder="Paste a JWT here..."
-            className="w-full rounded p-3 font-mono text-sm leading-relaxed"
-            style={{
-              backgroundColor: "var(--jwt-input-bg)",
-              border: parseError
-                ? "1px solid var(--jwt-red)"
-                : "1px solid var(--jwt-border)",
-              color: "var(--jwt-text)",
-            }}
-            spellCheck={false}
+            onChange={setEncodedToken}
+            hasError={!!parseError}
           />
 
           {parseError && (
@@ -416,12 +389,12 @@ export default function DebuggerPage() {
           )}
 
           <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-1.5">
-              <TokenStatus status={verifyStatus} message={verifyMessage} />
-              {jwksStatus !== "idle" && (
-                <JwksStatus status={jwksStatus} message={jwksMessage} />
-              )}
-            </div>
+            <CombinedStatus
+              verifyStatus={verifyStatus}
+              verifyMessage={verifyMessage}
+              jwksStatus={jwksStatus}
+              jwksMessage={jwksMessage}
+            />
             <div className="flex items-center gap-2">
               <CopyButton text={encodedToken} />
               <button
@@ -788,30 +761,125 @@ function Panel({
   );
 }
 
-// ---- JWKS status badge ----
-function JwksStatus({
-  status,
-  message,
+// ---- Single color-coded token input ----
+function ColoredTokenInput({
+  value,
+  onChange,
+  hasError,
 }: {
-  status: "idle" | "fetching" | "verified" | "failed" | "expired";
-  message: string;
+  value: string;
+  onChange: (v: string) => void;
+  hasError: boolean;
 }) {
-  const cfg = {
-    fetching: { color: "var(--jwt-text-muted)", bg: "rgba(136,136,170,0.12)", border: "rgba(136,136,170,0.3)", icon: "⟳", label: message },
-    verified: { color: "var(--jwt-green)",      bg: "rgba(0,200,150,0.10)",   border: "rgba(0,200,150,0.3)",    icon: "✓", label: message },
-    failed:   { color: "var(--jwt-red)",         bg: "rgba(251,1,91,0.10)",    border: "rgba(251,1,91,0.3)",     icon: "✗", label: message },
-    expired:  { color: "var(--jwt-yellow)",      bg: "rgba(240,192,64,0.10)",  border: "rgba(240,192,64,0.3)",   icon: "⏱", label: message },
-    idle:     { color: "var(--jwt-text-muted)", bg: "transparent",            border: "transparent",            icon: "",  label: "" },
-  }[status];
+  const divRef = useRef<HTMLDivElement>(null);
+  const isComposing = useRef(false);
+
+  // Rebuild inner HTML from value without moving caret if content matches
+  useEffect(() => {
+    const el = divRef.current;
+    if (!el) return;
+    const parts = value.split(".");
+    let html: string;
+    if (parts.length === 3 && value.trim()) {
+      html =
+        `<span style="color:var(--jwt-red)">${esc(parts[0])}</span>` +
+        `<span style="color:var(--jwt-text)">.</span>` +
+        `<span style="color:var(--jwt-purple)">${esc(parts[1])}</span>` +
+        `<span style="color:var(--jwt-text)">.</span>` +
+        `<span style="color:var(--jwt-cyan)">${esc(parts[2])}</span>`;
+    } else {
+      html = `<span style="color:var(--jwt-text)">${esc(value)}</span>`;
+    }
+    // Only update DOM if content actually changed (avoids caret jump)
+    if (el.innerHTML !== html) {
+      // Save and restore caret
+      const sel = window.getSelection();
+      let caretOffset = 0;
+      if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
+        caretOffset = getCaretOffset(el);
+      }
+      el.innerHTML = html || "";
+      if (document.activeElement === el) {
+        setCaretOffset(el, caretOffset);
+      }
+    }
+  }, [value]);
+
+  function handleInput() {
+    if (isComposing.current) return;
+    const el = divRef.current;
+    if (!el) return;
+    onChange(el.innerText.replace(/\n/g, "").trim());
+  }
+
+  function handlePaste(e: React.ClipboardEvent) {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain").replace(/\s/g, "");
+    document.execCommand("insertText", false, text);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") e.preventDefault(); // no newlines
+  }
 
   return (
     <div
-      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
-      style={{ backgroundColor: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}
-      title="JWKS auto-verification"
-    >
-      <span className={status === "fetching" ? "animate-spin inline-block" : ""}>{cfg.icon}</span>
-      <span>JWKS: {cfg.label}</span>
-    </div>
+      ref={divRef}
+      contentEditable
+      suppressContentEditableWarning
+      onInput={handleInput}
+      onPaste={handlePaste}
+      onKeyDown={handleKeyDown}
+      onCompositionStart={() => { isComposing.current = true; }}
+      onCompositionEnd={() => { isComposing.current = false; handleInput(); }}
+      data-placeholder="Paste a JWT here…"
+      spellCheck={false}
+      className="w-full rounded p-3 font-mono text-sm leading-relaxed break-all min-h-[120px] outline-none"
+      style={{
+        backgroundColor: "var(--jwt-input-bg)",
+        border: hasError ? "1px solid var(--jwt-red)" : "1px solid var(--jwt-border)",
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-all",
+      }}
+    />
   );
+}
+
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function getCaretOffset(el: HTMLElement): number {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return 0;
+  const range = sel.getRangeAt(0).cloneRange();
+  range.selectNodeContents(el);
+  range.setEnd(sel.anchorNode!, sel.anchorOffset);
+  return range.toString().length;
+}
+
+function setCaretOffset(el: HTMLElement, offset: number) {
+  const sel = window.getSelection();
+  if (!sel) return;
+  const range = document.createRange();
+  let remaining = offset;
+  function walk(node: Node): boolean {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const len = node.textContent?.length ?? 0;
+      if (remaining <= len) {
+        range.setStart(node, remaining);
+        range.collapse(true);
+        return true;
+      }
+      remaining -= len;
+    } else {
+      for (const child of Array.from(node.childNodes)) {
+        if (walk(child)) return true;
+      }
+    }
+    return false;
+  }
+  walk(el);
+  sel.removeAllRanges();
+  sel.addRange(range);
 }

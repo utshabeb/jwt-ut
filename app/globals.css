@@ -91,3 +91,10 @@ button, input, select, textarea {
 .hover-text:hover {
   color: var(--jwt-text) !important;
 }
+
+/* Placeholder for contenteditable token input */
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--jwt-text-muted);
+  pointer-events: none;
+}

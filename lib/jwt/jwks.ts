@@ -70,9 +70,11 @@ function base64urlToArrayBuffer(b64: string): ArrayBuffer {
 async function importRsaPublicKey(jwk: JWKSKey, alg: string): Promise<CryptoKey> {
   const hash = alg.endsWith("384") ? "SHA-384" : alg.endsWith("512") ? "SHA-512" : "SHA-256";
   const name = alg.startsWith("PS") ? "RSA-PSS" : "RSASSA-PKCS1-v1_5";
+  // Do NOT pass jwk.alg — Web Crypto rejects if the JWK alg field doesn't
+  // exactly match the algorithm name it expects (e.g. "RS256" vs "RSASSA-PKCS1-v1_5")
   return crypto.subtle.importKey(
     "jwk",
-    { kty: jwk.kty, n: jwk.n, e: jwk.e, alg: jwk.alg, use: jwk.use } as JsonWebKey,
+    { kty: jwk.kty, n: jwk.n, e: jwk.e } as JsonWebKey,
     { name, hash },
     false,
     ["verify"]
@@ -82,9 +84,10 @@ async function importRsaPublicKey(jwk: JWKSKey, alg: string): Promise<CryptoKey>
 async function importEcPublicKey(jwk: JWKSKey): Promise<CryptoKey> {
   const crv = jwk.crv ?? "P-256";
   const namedCurve = crv === "P-384" ? "P-384" : crv === "P-521" ? "P-521" : "P-256";
+  // Do NOT pass use/alg fields — can cause rejection in Web Crypto
   return crypto.subtle.importKey(
     "jwk",
-    { kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y, use: jwk.use } as JsonWebKey,
+    { kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y } as JsonWebKey,
     { name: "ECDSA", namedCurve },
     false,
     ["verify"]
@@ -101,32 +104,25 @@ async function verifyWithKey(
   headerPayload: string,
   signature: string
 ): Promise<boolean> {
-  try {
-    const sigBuf = base64urlToArrayBuffer(signature);
-    const dataBuf = toBuffer(headerPayload);
+  const sigBuf = base64urlToArrayBuffer(signature);
+  const dataBuf = toBuffer(headerPayload);
 
-    if (jwk.kty === "RSA") {
-      const key = await importRsaPublicKey(jwk, alg);
-      const hash = alg.endsWith("384") ? "SHA-384" : alg.endsWith("512") ? "SHA-512" : "SHA-256";
-      const params = alg.startsWith("PS")
-        ? { name: "RSA-PSS", saltLength: 32 }
-        : { name: "RSASSA-PKCS1-v1_5" };
-      // Suppress unused hash warning — it's used in importRsaPublicKey
-      void hash;
-      return await crypto.subtle.verify(params, key, sigBuf, dataBuf);
-    }
-
-    if (jwk.kty === "EC") {
-      const key = await importEcPublicKey(jwk);
-      const crv = jwk.crv ?? "P-256";
-      const hash = crv === "P-384" ? "SHA-384" : crv === "P-521" ? "SHA-512" : "SHA-256";
-      return await crypto.subtle.verify({ name: "ECDSA", hash }, key, sigBuf, dataBuf);
-    }
-
-    return false;
-  } catch {
-    return false;
+  if (jwk.kty === "RSA") {
+    const key = await importRsaPublicKey(jwk, alg);
+    const params = alg.startsWith("PS")
+      ? { name: "RSA-PSS", saltLength: 32 }
+      : { name: "RSASSA-PKCS1-v1_5" };
+    return await crypto.subtle.verify(params, key, sigBuf, dataBuf);
   }
+
+  if (jwk.kty === "EC") {
+    const key = await importEcPublicKey(jwk);
+    const crv = jwk.crv ?? "P-256";
+    const hash = crv === "P-384" ? "SHA-384" : crv === "P-521" ? "SHA-512" : "SHA-256";
+    return await crypto.subtle.verify({ name: "ECDSA", hash }, key, sigBuf, dataBuf);
+  }
+
+  throw new Error(`Unsupported key type: ${jwk.kty}`);
 }
 
 export async function jwksVerify(token: string): Promise<JWKSResult> {
@@ -175,8 +171,18 @@ export async function jwksVerify(token: string): Promise<JWKSResult> {
     }
 
     for (const key of candidates) {
-      const ok = await verifyWithKey(key, alg, headerPayload, signatureB64);
-      if (ok) return { valid: true, kid: key.kid, issuer: payload.iss };
+      try {
+        const ok = await verifyWithKey(key, alg, headerPayload, signatureB64);
+        if (ok) return { valid: true, kid: key.kid, issuer: payload.iss };
+      } catch (keyErr) {
+        // Log and continue to next key — surface last error if all fail
+        console.error("[jwks] verifyWithKey error:", keyErr);
+        return {
+          valid: false,
+          error: `Key import/verify error: ${keyErr instanceof Error ? keyErr.message : String(keyErr)}`,
+          issuer: payload.iss,
+        };
+      }
     }
 
     return { valid: false, error: "Signature verification failed against all matching JWKS keys", issuer: payload.iss };
