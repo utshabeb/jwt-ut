@@ -90,10 +90,10 @@ export default function Navbar() {
                   title={opt.label}
                   aria-label={`Switch to ${opt.label} theme`}
                   aria-pressed={isActive}
-                  className="flex items-center gap-1 px-2.5 py-1.5 transition-colors"
+                  className={`flex items-center gap-1 px-2.5 py-1.5 transition-colors${isActive ? "" : " hover-text"}`}
                   style={{
                     backgroundColor: isActive ? "var(--jwt-cyan)" : "transparent",
-                    color: isActive ? "#0f3460" : "var(--jwt-text-muted)",
+                    color: isActive ? "#ffffff" : "var(--jwt-text-muted)",
                     fontWeight: isActive ? 600 : 400,
                   }}
                 >
