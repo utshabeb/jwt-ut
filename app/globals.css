@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* ── Dark theme (default) ──────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --jwt-red: #fb015b;
+  --jwt-purple: #d63aff;
+  --jwt-cyan: #00b9f1;
+  --jwt-bg: #1a1a2e;
+  --jwt-surface: #16213e;
+  --jwt-surface2: #0f3460;
+  --jwt-border: #2a2a4a;
+  --jwt-text: #e0e0f0;
+  --jwt-text-muted: #8888aa;
+  --jwt-green: #00c896;
+  --jwt-yellow: #f0c040;
+  --jwt-input-bg: rgba(0,0,0,0.2);
+  --jwt-code-bg: rgba(0,0,0,0.3);
+  --jwt-hover-bg: rgba(255,255,255,0.05);
+}
+
+/* ── Light theme ───────────────────────────────────────── */
+[data-theme="light"] {
+  --jwt-red: #e0004e;
+  --jwt-purple: #9b00d9;
+  --jwt-cyan: #0086b3;
+  --jwt-bg: #f0f2f8;
+  --jwt-surface: #ffffff;
+  --jwt-surface2: #e4e8f4;
+  --jwt-border: #d0d4e8;
+  --jwt-text: #1a1a2e;
+  --jwt-text-muted: #555577;
+  --jwt-green: #008f6b;
+  --jwt-yellow: #b08000;
+  --jwt-input-bg: rgba(0,0,0,0.03);
+  --jwt-code-bg: rgba(0,0,0,0.04);
+  --jwt-hover-bg: rgba(0,0,0,0.04);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--jwt-bg);
+  color: var(--jwt-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--jwt-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--jwt-border);
+  border-radius: 3px;
+}
+
+/* Token color classes */
+.jwt-header-text { color: var(--jwt-red); }
+.jwt-payload-text { color: var(--jwt-purple); }
+.jwt-signature-text { color: var(--jwt-cyan); }
+
+/* Code / monospace */
+.font-mono {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+}
+
+/* Textarea reset */
+textarea {
+  resize: none;
+  outline: none;
+}
+
+/* Smooth transitions */
+button, input, select, textarea {
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+
+/* Theme-aware hover: muted → primary text */
+.hover-text:hover {
+  color: var(--jwt-text) !important;
+}
